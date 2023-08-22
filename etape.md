@@ -26,6 +26,7 @@ D'après le cours YouTube :\
   - Vérifier une information dans une base de données (`login`).
   - Effacer du contenu dans un cookie (`logout`)._Question : pourquoi la requête est-elle de type POST dans ce cas ?_
   - Verifier l'implémentation du userContext
+  - Revoir la création d'un model pour écrire des donnée sur mongoDb.
 
 1. **Note sur le use state**
 
@@ -855,10 +856,297 @@ On initialise `react-quill`
 
 On paramètre le module formats pour ajouter l'icone d'uplad de fichier. cf la [doc de react-quill](https://www.npmjs.com/package/react-quill#using-deltas)
 `<ReactQuill value={content} modules={modules} formats={formats} />`
+Puis on créer le dossier `api/uploads` pour receptionner les fichier uploader par notre editeur WYSIWYG
+
 On gère les état des champs titre, résumé et contenue du formulaire
 
-Ensuite on créer la fonction `createPost` afin d'envoyer au endppoint de l'API le contenue de l'article
+Ensuite on créer la fonction `createPost` dans le fichier `client\src\Pages\CreatePost.js` afin d'envoyer au endppoint de l'API le contenue de l'article
 
-<form onSubmit={createNewPost}> !! Se souvenir d'appeler la fonction lors de l'apelle du formulaire
+On commence par déclarer l'évenement onSubmit qui est associé à la fonction `createNewPost` que nous allons créer
+`<form onSubmit={createNewPost}>`
 
-On telecharge le `yarn add multer`
+puis on créer la fonction createNewPost que l'on commence avec un `ev.preventDefault` pour empecher le comportement par default d'un formulaie pour y placer notre logique comme l'envoi de donnée via une requete fetch.
+
+```js
+function createNewPost(ev) {
+  // ...
+  ev.preventDefault();
+  // ...
+}
+```
+
+Puis on définis l'envoi de donnée via une requete fetch à l'url localhost:4000/post avec les informations suivante :
+
+- methode post
+- body : qui recois les information sous la forme de **data** pour facilité l'upload de fichiers.
+
+On créer un objet `const data = new FormData()` dans lequel on parametre notre title, summary, content, file
+qu'on associe avec les evenements définis dans rendu JSX de notre composant.
+Lorsqu'un utilisateur envoie des information avec l'editeur WYSIWYG elles sont utilisé pour créer l'objet `data` qui sera envoyé via une requete fetch.
+⚠️Dans le rendu JSX au niveau de `input type file` on ne définis pas de valeur car le champs ne stock pas directement sa valeur dans l'état.
+
+Ensuite on créer notre endPoint `/post` dans `api/index.js` et grace a la librairie `yarn add multer` on vas pouvoir créer un `const uploadMiddleware = multer({ dest: "uploads/" });` qui enverra les fichiers uploader via l'éditeur WYSIWYG vers le dossier `api/uploads` grace a la fonction multer `single` de Multer pour transferer ces fichier vers `api/uploads`
+2.02.28
+
+Note :
+Le composant createPost est doté de 3 partie
+
+- **initailisation du useState** en reprenant dans l'etat local du composant les variable d'état pour le `titre`, `summary`, `content` et `file`.
+- **La fonction create poste** Celle qui gere le comporte lorsque que le formulaire est soumis. En créant l'objet `formData` associé au valeur saisie dans l'editeur WYSIWYG et utilise `fetch` pour envoyé les donnée au serveur
+- **Le rendu JSX** C'est la partie ou on définis comment les éléments sont affiché à l'écran.
+
+On telecharge le `yarn add multer` pour avoir un middleware permettant d'upload des fichier depuis le formulaire `createNewPost`.
+On l'initialise dans le fichier `api/index/js` et on apelle la fonction single depuis la route `/post`
+
+Cepdant on veut le nom original de ce que l'on upload, pour cela on vas utiliser le module `fs` de node
+
+```js
+//Utilisation du Middleware fournis par Multer pur uploader les fichiers soumis depuis le formulare createNewPost
+app.post("/post", uploadMiddleware.single("file"), (req, res) => {
+  const { originalname, path } = req.file;
+  const parts = originalname.split(".");
+  const ext = parts[parts.length - 1];
+
+  fs.renameSync(path, path + "." + ext);
+  res.json({ ext });
+});
+```
+
+02.09.45
+Ensuite on veut enregistrer notre fichier dans la BDD
+pour cela on créer un fichier `api/models/post.js`
+dans lequel on importe moongoose et on créée un schema avec les champs
+`title`, `summary`, `content` et `cover.`
+et on active le timestamp pour enregistrer le moment de l'update
+`api/models/post.js`
+
+```js
+const mongoose = require("mongoose");
+const { Schema, model } = mongoose;
+
+const PostSchema = new Schema(
+  {
+    title: String,
+    summary: String,
+    content: String,
+    cover: String,
+  },
+  {
+    timestamps: true,
+  }
+);
+
+const PostModel = model("Post", PostSchema);
+
+module.exports = PostModel;
+```
+
+On créé le modèle "Post" qui est associé au schéma "PostSchema" dans la route `/post` du fichier `api\models\Post.js`
+
+```js
+const { title, summary, content } = req.body;
+const postDoc = await Post.create({
+  title,
+  summary,
+  content,
+  cover: newPath,
+});
+```
+
+Puis on fait la redirection
+
+## Afficher les post depuis une base de données.
+
+Pour afficher les articles depuis la base de donnée il faut récupérer les donnée depuis le endpoint `/post` pour avoir les publication existante au format JSON que le front end récupère avec l'API fetch.
+
+**Utiliser le UseEffect** pour récupérer les articles des que la homePage est montée.
+
+**Authentification utilisateur** Lorsqu'un utilisateur est connecté un token JSON Web est généré, ce qui permet d'identifié l'utilisateur.
+
+**Afficher les publication** récupérer depuis la BDD avec son titre, résumé, auteur, cover.
+
+**Formater les date** avec la bibliotheque `date-fns`
+
+**Afficher les images** avec le middleware `express.Static` pour diriger les requete vers le repertoire `uploads`
+
+**tri et limitation de publication** Les article sont trié du plus récent au plus ancien et seulement les 20 derniere publication sont affiché.
+
+### Récupération des publication depuis la bdd
+
+#### Récupération des publication depuis la BDD
+
+Dans `client\src\Pages\IndexPage.js` Le **useEffect()** utilise l'API fetch pour envoyer une requete GET a l'API qui est envoyé au endpoint `/post` configurer pour renvoyer la liste des publications
+
+```js
+export default function IndexPage() {
+  const [posts, setPosts] = useState([]);
+  useEffect(() => {
+    fetch("http://localhost:4000/post").then((response) => {
+      response.json().then((posts) => {
+        setPosts(posts);
+      });
+    });
+  }, []);
+  return <>{posts.length > 0 && posts.map((post) => <Post {...post} />)}</>;
+}
+```
+
+#### Traitement des publication dans l'API
+
+Lorsque que la requete GET est reçu l'API effectue une recherche dans la BDD a l'aide du modèle de donné `api\models\Post.js` une fois récupéré elles sont trié par date de création avec `sort()` et limité a 20 publication avec `limit()`
+Dans `api/index.js`
+
+```js
+app.get("/post", async (req, res) => {
+  res.json(
+    await Post.find()
+      .populate("author", ["username"])
+      .sort({ createdAt: -1 })
+      .limit(20)
+  );
+});
+```
+
+#### Envoi des donnée au front end
+
+Une fois que le front end recois la réponse JSON de l'API il peut parcourir les objets pour extraire les informations comme le titre, le résumé etc.
+
+#### Affichage des publication dans le composant index
+
+Lorsque que les publication sont mis a jour dans le useState le composant utilise une boucle `map()` afin de générer un composant post pour chaque publication.
+
+### ⚠️Le nom d'auteur dans un environnement NoSQL
+
+Pour afficher le nom d'auteur plusieur défi s'impose
+
+#### Les relation entres les collections
+
+une requete distincte avec la methode `populate()` pour récupérer les donnée lié d'une collection associé.
+
+#### Performance
+
+Une optimisation des requete est nécéssaire pour minimiser les appel inutil a la BDD
+
+#### Sécurité
+
+Il faut s'assurer de gerer les autorisation de l'utilisateur sous peine d'exposer des donnée sensible comme le mot de passe a des utilsiateur non autorisé.
+
+--
+Pour afficher le title et le summary il faut ...
+...
+3.32.09 installation de la librairie react-time-ago pour avoir des different format de date avec `yarn add date-fns` et en le paramétrant ....
+
+Ensuite pour afficher l'auteur
+On définis dans le PostSchema de `Api/models/Post.js`
+`author: { type: Schema.Types.ObjectId, ref: "User" },`
+
+Dans `client\src\Pages\CreatePost.js` on ajoute le `credentials` pour envoyer les cookies
+
+```js
+const response = await fetch("http://localhost:4000/post", {
+  method: "POST",
+  body: data,
+  credentials: "include",
+});
+```
+
+Puis on créer le middleware pour gérer la création d'un nouveau "Post" avec un JWT
+
+```js
+const { token } = req.cookies; // extrait la propriété token de l'objet req.cookies et d'assigner sa valeur à la variable token.
+// Utilise la méthode "verify" du module "jwt" pour vérifier la validité du jeton (token).
+jwt.verify(token, secret, {}, async (err, info) => {
+  if (err) throw err; // Si une erreur survient pendant la vérification du jeton, lance une exception avec l'erreur.
+  const { title, summary, content } = req.body;
+  const postDoc = await Post.create({
+    title,
+    summary,
+    content,
+    cover: newPath,
+    author: info.id,
+  });
+  res.json(info); // Si la vérification réussit, renvoie les informations du profil (contenues dans "info") au format JSON en réponse.
+  res.json(postDoc); // Répondre avec l'extension du fichier dans un objet JSON
+});
+```
+
+On ajoute la méthode `populate` de Mongoose pour chercher dans le modele `Post` les référence du champs `User`
+
+```js
+app.get("/post", async (req, res) => {
+  res.json(await Post.find().populate("author"));
+});
+```
+
+.... revoir le tuto
+
+Ensuite pour changer l'ordre d'affichage pour que les derniers articles soit affiché en haut on rajoute les methode `sort` et `limit` dans notre `api/index`
+
+```js
+app.get("/post", async (req, res) => {
+  res.json(
+    await Post.find()
+      .populate("author", ["username"])
+      .sort({ createdAt: -1 })
+      .limit(20)
+  );
+});
+```
+
+Ensuite pour afficher l'image a la une dans notre `client/src/Post.js` on met `<img src={"http://localhost:4000/" + cover} alt="" />` et on créer notre endpoint dans `api/index.js`
+Et on définis le endpoint aec la requete GET `app.use("/uploads", express.static(__dirname + "/uploads"));` pour servir les fichier depuis le dossier uploads
+
+## Single Post Page
+
+## Note
+
+Le dossier models contient les script qui enregistre des info dans la base de données.
+Comme un nouvel utilisateur.
+Un nouvel article soumis via le formulaire.
+
+Créer un article sur la mise en place d'une redirection.
+
+### Création d'une redirection
+
+Pour créer une redirection dans un composant React, on importe le comosant `Navigate` depuis "react-router-dom"
+`import { Navigate } from "react-router-dom";`
+
+Ensuite on créer un état `redirect` qui sera utilisé pour déclenché la redirection
+
+`const [redirect, setRedirect] = useState(false);`
+
+Puis on créé avant le rendu JSX une condition qui vérifie si `redirect` est true, dans quel cas on utilise le composant Navigate pour redirigé vers la page souhaité.
+
+```js
+if (redirect) {
+  return <Navigate to={"/"} />;
+}
+```
+
+### Soumission du formulaire CreateNewPost
+
+soumission du formulaire CreateNewPost et de son fonctionnement avec MongoDB :
+
+**Préparation du Formulaire** : On a créer un formulaire CreateNewPost qui permet aux utilisateurs de saisir les informations d'un nouveau post, y compris le titre, le résumé, le contenu et un fichier (cover) à télécharger.
+
+**Soumission du Formulaire** : Lorsque l'utilisateur remplit les champs du formulaire et soumet celui-ci, une requête POST est générée et envoyée au serveur.
+
+**Gestion de la Requête sur le Serveur** : Le serveur (dans votre cas, basé sur Express.js) reçoit la requête POST envoyée par le client.
+
+**Gestion du Fichier Upload** : Le middleware multer permet d'intercepter la requête et traite le téléchargement du fichier (cover) spécifié dans le champ de formulaire "file". multer enregistre temporairement le fichier sur le serveur.
+
+**Extraction des Données** : En parallèle, les autres données du formulaire (titre, résumé, contenu) sont extraites du corps de la requête (req.body) à l'aide de la déstructuration.
+
+**Création d'un Document** : Avec les données extraites (titre, résumé, contenu) et le chemin du fichier téléchargé (cover), un nouveau document de type "Post" est créé en utilisant le modèle "Post" défini avec Mongoose.
+
+**Enregistrement dans MongoDB** : Le document du post nouvellement créé est enregistré dans la base de données MongoDB à l'aide de la méthode create du modèle "Post".
+
+**Réponse au Client** : Une fois que le document a été créé et enregistré avec succès dans la base de données, une réponse est renvoyée au client. Cette réponse contient le document du post nouvellement créé, y compris toutes les informations saisies et le chemin du fichier cover.
+
+Affichage ou Redirection : Le client peut afficher les détails du post nouvellement créé ou être redirigé vers une autre page, par exemple la page d'accueil.
+
+### Vocabulaire :
+
+**middleware** : Les middlewares sont utilisés pour effectuer des opérations spécifiques avant ou après le traitement principal d'une requête. Ils peuvent être utilisés pour des tâches telles que la validation des données, l'authentification des utilisateurs, la gestion des erreurs, la compression des données, la journalisation, etc.
+
+Dans ce projet on utilise le middleware fournis par la librairie Multer pour pouvoir uploader des fichier sur notre editeur WYSIWYG
