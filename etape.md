@@ -1098,6 +1098,38 @@ Et on définis le endpoint aec la requete GET `app.use("/uploads", express.stati
 
 ## Single Post Page
 
+Maintenat qu'on affiche les article present dans notre base de donnée, nous voulons afficher l'article dans une nouvelle page.
+Pour cela on prendra on ira a l'url `/post/id`
+
+Pour cela on commence a placer notre image de `client/src/post.js` dans une balise `<Link to={`/post/${\_id}`}>`
+
+Ensuite on créer une `client/post/PostPage.js` dans lequel on utilise le hook **`useParams`** qui permet de passer la valeur du parametre `postId` pour l'url dynamique `/post/:postId`
+
+Création de la requête dans `api/index.js` à l'aide de l'id récupéré pour obtenir les details de la publication a l'aide de `populate` et `findById` afin de cacher le password username a des personne malveillante.
+
+### Edit post
+
+On vas voir comment ajouté une fonctionalité d'éditions d'articles.
+
+**Fonctionalité d'éditions** : Lorsqu'un utilisateur est connecté il dois pouvoir modifier l'article.
+
+Pour cela on ajoute un boutton modifier a `client\src\Pages\PostPage.js`
+Qui mene grace au hook `Link` vers ` <Link href="" className="edit-btn" to={`/edit/${postInfo.\_id}`}>`
+
+Ensuite on créer le composant en important le formulaire du composant `createPost`
+Cependant on enleve la `const format` ( pkoi ? )
+
+**Authentification utilisateur** : Verifier l'id de l'utilisateur par rapport a l'id de l'auteur pour verifier si l'utilisateur a le droit d'editer l'article.
+
+**Pré remplir l'editeur d'article** grace a une requete fetch en backend.
+
+**le composant editor** pour que l'auteur puisse modifier l'article on créer le composant Editor.
+Il comprendra le React-Quill
+
+**Mise a jour des information de l'article** a l'aide d'une requette HTTP de type PUT
+
+**Comparaison des nouveaux chemin d'image** Si il en utilise un nouveau on ajoute le chemin sinon on garde l'ancien.
+
 ## Note
 
 Le dossier models contient les script qui enregistre des info dans la base de données.
@@ -1105,6 +1137,17 @@ Comme un nouvel utilisateur.
 Un nouvel article soumis via le formulaire.
 
 Créer un article sur la mise en place d'une redirection.
+
+Le hook **useParams** de **react-router-dom** permet de créer des url dynamique pour affiché des contenu unique.
+
+Utilisation de [heroicons](https://heroicons.com/) pour les icones
+
+### Creation d'une Route
+
+On importe le hook `Link` de `react-router-dom` dans un composant.
+Ensuite on insère une balise `Link` dans le rendu JSX
+On créer le composant qu le `Link` cible
+Puis on créer la route dans `App.js`
 
 ### Création d'une redirection
 
@@ -1144,6 +1187,41 @@ soumission du formulaire CreateNewPost et de son fonctionnement avec MongoDB :
 **Réponse au Client** : Une fois que le document a été créé et enregistré avec succès dans la base de données, une réponse est renvoyée au client. Cette réponse contient le document du post nouvellement créé, y compris toutes les informations saisies et le chemin du fichier cover.
 
 Affichage ou Redirection : Le client peut afficher les détails du post nouvellement créé ou être redirigé vers une autre page, par exemple la page d'accueil.
+
+### Utilisation du hook useParams de react-router-dom
+
+Pour afficher le contenue unique des articles créé dans notre blog on utilise le hook `useParams` de `react-outer-dom` pour créer un URL dynamique.
+
+- **Importation du Hook** : Tout d'abord, vous devez importer le hook useParams depuis le module react-router-dom :
+
+- **Extraction des Paramètres**: Utilisez le hook useParams dans le composant pour extraire les paramètres de l'URL.
+  `client\src\Pages\PostPage.js`
+
+```js
+export default function PostPage() {
+  const [postInfo, setPostInfo] = useState(null);
+  const { id } = useParams();
+  useEffect(() => {
+    console.log(id);
+    fetch(`http://localhost:4000/post/${id}`).then((response) => {
+      response.json().then((postInfo) => {
+        setPostInfo(postInfo);
+      });
+    });
+  }, []);
+  //...
+}
+```
+
+**Utilisation des Paramètres** : On peut maintenant faire une requête vers le serveur pour récupérer les détails de l'article avec l'ID correspondant :
+PS on utilise la methode populate de mongoose pour sécurisé l'exposition du mot de passe utilisateur
+`api\index.js`
+
+```js
+const postDoc = await Post.findById(id).populate("author", ["username"]);
+```
+
+**Affichage Dynamique** : Ensuite, utilisez la valeur extraite de l'URL pour afficher dynamiquement le contenu approprié dans le rendu JSX du composant. Dans cet exemple, vous avez affiché le titre, l'image, le contenu, l'auteur et d'autres détails de l'article en utilisant la valeur postInfo récupérée.
 
 ### Vocabulaire :
 

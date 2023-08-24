@@ -111,4 +111,41 @@ app.get("/post", async (req, res) => {
   );
 });
 
+app.get("/post/:id", async (req, res) => {
+  const { id } = req.params;
+  const postDoc = await Post.findById(id).populate("author", ["username"]);
+  res.json(postDoc);
+});
+
+app.put("/post", uploadMiddleware.single("file"), async (req, res) => {
+  let newPath = null;
+  if (req.file) {
+    const { originalname, path } = req.file; // Extraire les propriétés "originalname" et "path" du fichier soumis
+    const parts = originalname.split("."); // Séparer le nom du fichier en parties en utilisant le point comme séparateur
+    const ext = parts[parts.length - 1]; // Extraire l'extension du fichier à partir des parties
+    newPath = path + "." + ext; // Construire le nouveau chemin en ajoutant l'extension au chemin d'origine
+    fs.renameSync(path, newPath);
+  }
+
+  const { token } = req.cookies;
+  jwt.verify(token, secret, {}, async (err, info) => {
+    if (err) throw err; // Si une erreur survient pendant la vérification du jeton, lance une exception avec l'erreur.
+
+    const { id, title, summary, content } = req.body;
+    const postDoc = await Post.findById(id);
+    const isAuthor = JSON.stringify(postDoc.author) === JSON.stringify(info.id);
+    if (!isAuthor) {
+      return res.status(400).json("you are not the author");
+    }
+
+    await postDoc.updateOne({
+      title,
+      summary,
+      content,
+      cover: newPath ? newPath : postDoc.cover,
+    });
+    res.json(postDoc);
+  });
+});
+
 app.listen(4000);

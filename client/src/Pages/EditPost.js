@@ -1,71 +1,54 @@
-import "react-quill/dist/quill.snow.css";
+import { Navigate, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 import Editor from "../Editor";
-import { Navigate } from "react-router-dom";
-import ReactQuill from "react-quill";
-import { useState } from "react";
 
-const modules = {
-  toolbar: [
-    [{ header: [1, 2, false] }],
-    ["bold", "italic", "underline", "strike", "blockquote"],
-    [
-      { list: "ordered" },
-      { list: "bullet" },
-      { indent: "-1" },
-      { indent: "+1" },
-    ],
-    ["link", "image"],
-    ["clean"],
-  ],
-};
-
-const formats = [
-  "header",
-  "bold",
-  "italic",
-  "underline",
-  "strike",
-  "blockquote",
-  "list",
-  "bullet",
-  "indent",
-  "link",
-  "image",
-];
-
-export default function CreatePost() {
+export default function EditPost() {
+  const { id } = useParams();
   const [title, setTitle] = useState("");
   const [summary, setSummary] = useState("");
   const [content, setContent] = useState("");
   const [files, setFiles] = useState("");
   const [redirect, setRedirect] = useState(false);
 
-  async function createNewPost(ev) {
+  useEffect(() => {
+    fetch("http://localhost:4000/post/" + id).then((response) => {
+      response.json().then((postInfo) => {
+        setTitle(postInfo.title);
+        setContent(postInfo.content);
+        setSummary(postInfo.summary);
+      });
+    });
+  }, []);
+
+  async function updatePost(ev) {
+    ev.preventDefault();
     const data = new FormData();
     data.set("title", title);
     data.set("summary", summary);
     data.set("content", content);
-    data.set("file", files[0]);
-    ev.preventDefault();
+    data.set("id", id);
+    if (files?.[0]) {
+      data.set("file", files?.[0]);
+    }
+
     const response = await fetch("http://localhost:4000/post", {
-      method: "POST",
+      method: "PUT",
       body: data,
       credentials: "include",
     });
-    console.log(await response.json());
     if (response.ok) {
       setRedirect(true);
     }
   }
 
   if (redirect) {
-    return <Navigate to={"/"} />;
+    return <Navigate to={"/post/" + id} />;
   }
   return (
-    <form onSubmit={createNewPost} enctype="multipart/form-data">
+    <form onSubmit={updatePost} enctype="multipart/form-data">
       <input
-        onSubmit={createNewPost}
+        onSubmit={updatePost}
         type="title"
         placeholder={"Title"}
         value={title}
@@ -82,8 +65,8 @@ export default function CreatePost() {
         //value={file}
         onChange={(ev) => setFiles(ev.target.files)}
       />
-      <Editor value={content} onChange={setContent} />
-      <button style={{ marginTop: "5px" }}>Create post</button>
+      <Editor onChange={setContent} value={content} />
+      <button style={{ marginTop: "5px" }}>Update post</button>
     </form>
   );
 }
