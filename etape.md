@@ -12,6 +12,10 @@ D'après le cours YouTube :\
   - /client : `yarn start`
   - /api : `nodemon index.js`
 
+Pour se Login
+user : test
+password : test
+
 ## Notes sur les connaissances à revoir ou à vérifier
 
 - S'habituer à la syntaxe des callbacks.
@@ -1124,7 +1128,7 @@ Cependant on enleve la `const format` ( pkoi ? )
 **Pré remplir l'editeur d'article** grace a une requete fetch en backend.
 
 **le composant editor** pour que l'auteur puisse modifier l'article on créer le composant Editor.
-Il comprendra le React-Quill
+Il comprendra le ReactQuill
 
 **Mise a jour des information de l'article** a l'aide d'une requette HTTP de type PUT
 
@@ -1141,6 +1145,10 @@ Créer un article sur la mise en place d'une redirection.
 Le hook **useParams** de **react-router-dom** permet de créer des url dynamique pour affiché des contenu unique.
 
 Utilisation de [heroicons](https://heroicons.com/) pour les icones
+
+Pourquoi créer un credentials dans les `const response` pour utilisé les cookie ?
+
+J'ai du changer la fonction await postDoc.update en fonction await postDoc.updateOne
 
 ### Creation d'une Route
 

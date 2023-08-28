@@ -2,7 +2,6 @@ import "react-quill/dist/quill.snow.css";
 
 import Editor from "../Editor";
 import { Navigate } from "react-router-dom";
-import ReactQuill from "react-quill";
 import { useState } from "react";
 
 const modules = {
@@ -53,7 +52,7 @@ export default function CreatePost() {
       body: data,
       credentials: "include",
     });
-    console.log(await response.json());
+
     if (response.ok) {
       setRedirect(true);
     }
