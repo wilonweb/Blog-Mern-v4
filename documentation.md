@@ -8,7 +8,7 @@ D'après le cours YouTube
 
 ## Table des matieres.
 
-[00:00:00](https://www.youtube.com/watch?v=xKs2IZZya7c&t=0s) - Intro
+[00:00:00](https://www.youtube.com/watch?v=xKs2IZZya7c&t=0s) - Intro \
 [00:02:02](https://www.youtube.com/watch?v=xKs2IZZya7c&t=122s) - Building homepage with react
 [00:23:35](https://www.youtube.com/watch?v=xKs2IZZya7c&t=1415s) - Routing with react-router-dom
 [00:34:50](https://www.youtube.com/watch?v=xKs2IZZya7c&t=2090s) - Login and register page
@@ -292,8 +292,11 @@ return (
       onChange={(ev) => setSummary(ev.target.value)}
     />
           <input type="file" onChange={(ev) => setFiles(ev.target.files)} />
-          <Editor onChange={setContent} value={content} />     {" "}
-    <button style={{ marginTop: "5px" }}>Update post</button>   {" "}
+          <Editor onChange={setContent} value={content} />      <button
+      style={{ marginTop: "5px" }}
+    >
+      Update post
+    </button>   {" "}
   </form>
 );
 ```
