@@ -87,7 +87,7 @@ On commence par créer deux dossier
 - client
 - api
 
-Ensuite on install `yarn create react-app .`
+Ensuite on navigue dans le dossier client et on installe `yarn create react-app .`
 puis lon lance le server avec `yarn start`
 
 modifier le code dans `client\src\App.js`
@@ -263,9 +263,11 @@ On créer un composant `Post.js` et `Header.js`
 Dans `client\src\index.js` on importe `import { BrowserRouter } from "react-router-dom";` afin de faire passer le Browser Router
 
 ```js
-<BrowserRouter>
-  <App />
-</BrowserRouter>
+<React.StrictMode>
+  <BrowserRouter>
+    <App />
+  </BrowserRouter>
+</React.StrictMode>
 ```
 
 On a egalement replacer dans `client\src\Header.js` les lien `<a href></a>` et `<Link to></Link>`
@@ -305,7 +307,7 @@ app.listen(4000);
 ```
 
 on install `yarn global add nodemon`
-et on lance `nodedemon index.js`
+et on lance `nodemon index.js`
 Puis on vérifie que tout fonctionne dans `localhost:4000/test`
 
 Ensuite je re définis le code dans `api\index.js` pour faire passer une valeur post
@@ -896,7 +898,7 @@ Note :
 Le composant createPost est doté de 3 partie
 
 - **initailisation du useState** en reprenant dans l'etat local du composant les variable d'état pour le `titre`, `summary`, `content` et `file`.
-- **La fonction create poste** Celle qui gere le comporte lorsque que le formulaire est soumis. En créant l'objet `formData` associé au valeur saisie dans l'editeur WYSIWYG et utilise `fetch` pour envoyé les donnée au serveur
+- **La fonction create poste** Celle qui gere le comportement lorsque que le formulaire est soumis. En créant l'objet `formData` associé au valeur saisie dans l'editeur WYSIWYG et utilise `fetch` pour envoyé les donnée au serveur
 - **Le rendu JSX** C'est la partie ou on définis comment les éléments sont affiché à l'écran.
 
 On telecharge le `yarn add multer` pour avoir un middleware permettant d'upload des fichier depuis le formulaire `createNewPost`.
@@ -1159,7 +1161,7 @@ Puis on créer la route dans `App.js`
 
 ### Création d'une redirection
 
-Pour créer une redirection dans un composant React, on importe le comosant `Navigate` depuis "react-router-dom"
+Pour créer une redirection dans un composant React, on importe le composant `Navigate` depuis "react-router-dom"
 `import { Navigate } from "react-router-dom";`
 
 Ensuite on créer un état `redirect` qui sera utilisé pour déclenché la redirection
