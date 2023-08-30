@@ -8,7 +8,7 @@ D'après le cours YouTube
 
 ## Ce que l'on apprend avec le projet
 
-- Paramétrage de routeur react-routeur-dom
+- [Paramétrage de routeur react-routeur-dom](https://github.com/wilonweb/Blog-Mern-v4/blob/main/documentation.md#param%C3%A9trage-du-react-router-dom)
 - Paramétrage du hook useState
 - Paramétrage d'une requete Post
 - Gestion des problème CORS
