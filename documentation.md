@@ -6,21 +6,13 @@ D'après le cours YouTube
 [Build a Fullstack Blog App using MERN (mongo, express, react, node)](https://www.youtube.com/watch?v=xKs2IZZya7c&t=10566s)
 @ [Coding With Dawid](https://www.youtube.com/@CodingWithDawid)
 
-## Table des matieres.
+## Ce que l'on apprend avec le projet
 
-[00:00:00](https://www.youtube.com/watch?v=xKs2IZZya7c&t=0s) - Intro \
-[00:02:02](https://www.youtube.com/watch?v=xKs2IZZya7c&t=122s) - Building homepage with react
-[00:23:35](https://www.youtube.com/watch?v=xKs2IZZya7c&t=1415s) - Routing with react-router-dom
-[00:34:50](https://www.youtube.com/watch?v=xKs2IZZya7c&t=2090s) - Login and register page
-[00:42:32](https://www.youtube.com/watch?v=xKs2IZZya7c&t=2552s) - Authentication
-[01:22:01](https://www.youtube.com/watch?v=xKs2IZZya7c&t=4921s) - Checking if logged in
-[01:30:38](https://www.youtube.com/watch?v=xKs2IZZya7c&t=5438s) - Logout functionality
-[01:33:05](https://www.youtube.com/watch?v=xKs2IZZya7c&t=5585s) - UserContext
-[01:41:04](https://www.youtube.com/watch?v=xKs2IZZya7c&t=6064s) - Create new post page
-[02:15:52](https://www.youtube.com/watch?v=xKs2IZZya7c&t=8152s) - Displaying posts from the database
-[02:38:26](https://www.youtube.com/watch?v=xKs2IZZya7c&t=9506s) - Single post page
-[03:02:20](https://www.youtube.com/watch?v=xKs2IZZya7c&t=10940s) - Edit post page
-[03:31:57](https://www.youtube.com/watch?v=xKs2IZZya7c&t=12717s) - Outro
+- Paramétrage de routeur react-routeur-dom
+- Paramétrage du hook useState
+- Paramétrage d'une requete Post
+- Gestion des problème CORS
+- ... Bientot la suite
 
 ## Liste des commandes
 
@@ -35,7 +27,7 @@ D'après le cours YouTube
 
 ## Package utilisé
 
-### Backend
+### Package coté Backend
 
 #### bcryptjs
 
@@ -68,7 +60,7 @@ Permet d'utiliser la BDD NoSQL mongoDb et de manipuler des données.
 
 Middleware permettant de faciliter l'envoi de fichier depuis un formulaire.
 
-### Client
+### Package coté Front
 
 #### date-fns
 
@@ -115,7 +107,7 @@ bibliothèque JavaScript qui facilite la gestion des routes et de la navigation 
 
 Le dossier api contient le code backend du programme
 
-#### Dossier: models
+- #### Dossier: models
 
 Le dossier models contient les script qui définissent des models de schema, qui sont les information qu'on GET/PUT/UPDATE/DELETE dans la base de données.
 Comme la création d'un nouvel utilisateur,
@@ -127,7 +119,7 @@ pour établir une référence à un autre objet, nous définissons le champ sous
 
 Lorsque nous définissons ces modèles de schéma, nous pouvons inclure l'option `timestamps: true`. Cela ajoute automatiquement les champs "createdAt" et "updatedAt" à chaque document. Cela nous permet de suivre quand les entrées ont été créées et mises à jour
 
-##### Fichier: Post.js
+- - ##### Fichier: Post.js
 
 **Définition le shema du model post.**
 C'est un model mongoose contient pour les docuemnts "Post" contenant les champs `title`, `summary`, `content`, `cover`, et `author`. Les types de données de ces champs sont définis (tous sont des chaînes de caractère sauf `author` qui est une référence à l'objet "User"). que l'on appelle grâce à son id.
