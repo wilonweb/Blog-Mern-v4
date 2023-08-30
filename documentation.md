@@ -103,6 +103,30 @@ bibliothèque JavaScript qui facilite la gestion des routes et de la navigation 
 
 ## Architecture du code
 
+api/
+├── models/
+│ ├── Post.js
+│ ├── User.js
+├── uploads/
+
+client/
+├── Pages/
+│ ├── CreatePost.js
+│ ├── EditPost.js
+│ ├── IndexPage.js
+│ ├── LoginPage.js
+│ ├── PostPage.js
+│ ├── RegisterPage.js
+├── app.css
+├── App.js
+├── Editor.js
+├── Header.js
+├── index.css
+├── index.js
+├── Layout.js
+├── Post.js
+├── UserContext.js
+
 ### Dossier Parent: api
 
 Le dossier api contient le code backend du programme
