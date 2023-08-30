@@ -128,11 +128,11 @@ Une référence en programmation, notamment avec Mongoose, est une relation éta
 
 **Options du Schéma** : Les options du schéma sont définies dans un objet. Ici, `timestamps: true` est utilisé pour ajouter automatiquement des champs `createdAt` et `updatedAt` aux documents.
 
-##### Fichier: User.js
+- - ##### Fichier: User.js
 
 C'est un modèle mongoose pour les documents "User" dans mongoDb qui définis les ainsi que leur contriantes ( longeur minimale, l'unicité et le fait que le champs est obligatoire )
 
-#### Dossier: uploads
+- #### Dossier: uploads
 
 Contient tout les fichiers uploader via l'éditeur WYSIWYG fournis par React-Quill
 
@@ -140,11 +140,11 @@ Contient tout les fichiers uploader via l'éditeur WYSIWYG fournis par React-Qui
 
 Le dossier client contient le code front end du programme
 
-#### Dossier: Pages
+- #### Dossier: Pages
 
 Le dossier "Pages" contient les composants des différentes pages de l'application.
 
-##### Fichier: CreatePost.js
+- - ##### Fichier: CreatePost.js
 
 La page CreatePost.js est accessible à l'url `"http://localhost:4000/create"`
 La page est responsable de la création d'un nouveau post.
@@ -160,7 +160,7 @@ Le composant createPost est doté de 3 partie
   apelle la fonctione createNewPost quand le formulaire est saisie  
   Gere la redirection si la création de l'article est réussie, la variable "redirect" est mise à "true" et le composant "Navigate" est utilisé pour rediriger l'utilisateur vers la page d'accueil.
 
-##### Fichier: EditPost.js
+- - ##### Fichier: EditPost.js
 
 La page EditPost est accessible a l'url `http://localhost:3000/edit/:postId`
 Elle est responsable de mettre a jour un article existant quand on clique sur le boutton editPost présent dans le rendu JSX de ...
