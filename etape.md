@@ -608,7 +608,7 @@ export default function RegisterPage() {
 
 #### Encrypter le mot de passe avec bcryptjs
 
-installation de `yarn bcryptjs` afin de pouvoir hasher le password des utilisateur qui ss'enregistre.
+installation de `yarn add bcryptjs` afin de pouvoir hasher le password des utilisateur qui s'enregistre.
 
 On initialise bcrypt et salt dans notre `api\index.js` afin de d'utiliser une fonctionalité de hashing sur la propriété password de notre l'objet UserDoc servant a créer un nouvel utilisateur dans la Base de donnée.
 
@@ -636,7 +636,7 @@ async function login(ev) {
 ``;
 ```
 
-Ensuite on verifie si l'username correspond au mot de passe hashé dans `api\index.js`
+Ensuite on verifie si l'username correspond au mot de passe hashé dans `api\index.js`etape
 
 ```js
 //Route pour vérifier que le username = password crypté dans la page login
@@ -664,8 +664,8 @@ Puis on créer une condition qui transmet un token si le combo username/password
 ```
 
 Puis on définis dans la fonction `login`
-la ligne de code `credentials: "include",` permettant que le cookie est conservé meme quand l'utilisateur visite d'autre URL du site.
-Sans oublier d'indiquer a la CORS d'inclure les cookie au requete dont l'url d'origine et celle du site. (`api/index.js`)
+la ligne de code `credentials: "include",` permettant que le cookie soit conservé meme quand l'utilisateur visite d'autre URL du site.
+Sans oublier d'indiquer a l'erreur CORS d'inclure les cookie au requete dont l'url d'origine et celle du site. (`api/index.js`)
 
 `app.use(cors({ credentials: true, origin: "http://localhost:3000" }));`
 

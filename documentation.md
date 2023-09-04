@@ -494,6 +494,416 @@ Timing
 
 ### Gestion des problème CORS
 
+Maintenant que nous avons paramétrer la requete Post du formulaire Register, nous avons un statut CORS error dans le devTools>network>Status.
+
+Pour régler le problème on installe donc dans `api` le paquet `yarn add cors` puis on l'initialise dans `api\index.js`
+
+```js
+/*const express = require("express");*/
+const cors = require("cors");
+
+//const app = express();
+
+app.use(cors()); // Activation de la gestion des requêtes CORS
+/**
+app.use(express.json());
+app.post("/register", (req, res) => {
+  res.json("test ok5");
+});
+app.listen(4000);*/
+```
+
+### Envoyer une requête post avec mongoDb.
+
+Une fois qu'on a gérer l'erreur CORS on peut envoyer nos donné a mongoDb pour cela
+On créer un compte et une base de donnée mongoDb
+On installe mongoose dans `yarn add mongoose` dans api
+On paramètre mongoose dans `api/index.js`
+En initialisant, connectant la base de de donnée,
+
+```js
+/**
+const express = require("express");
+const cors = require("cors");
+*/
+const { default: mongoose } = require("mongoose");
+/*const app = express();
+
+app.use(cors()); // Activation de la gestion des requêtes CORS
+app.use(express.json()); // initalisation du serveur express
+*/
+// Connexion à la base de données MongoDB
+mongoose.connect(
+  "mongodb+srv://wilonweb:VZ1TsAuGQ3td2Vsl@cluster0.nw96w6o.mongodb.net/?retryWrites=true&w=majority"
+);
+
+/*const User = require("./models/User");
+
+app.post("/register", async (req, res) => {
+  const { username, password } = req.body;
+  const UserDoc = await User.create({
+    username,
+    password,
+  });
+  res.json(UserDoc);
+});
+app.listen(4000); // Démarrage du serveur sur le port 4000*/
+/*
+```
+
+Ensuite on définis un Schema dans `api/User.js`
+En initialisant mongoose et les hook Schema et model.
+En définissant un Schema pour les champs envoyé a envoyé à la base de donnée.
+Puis on export le modele.
+
+```js
+const mongoose = require("mongoose");
+const { Schema, model } = mongoose;
+
+const UserSchema = new Schema({
+  username: { type: String, required: true, min: 4, unique: true },
+  password: { type: String, required: true },
+});
+
+const UserModel = model("User", UserSchema);
+module.exports = UserModel;
+```
+
+Puis on associe notre modèle à une requêtes /post vers le endpoint /register dans une requête asynchrone.
+
+```js
+/**
+const express = require("express");
+const cors = require("cors");
+
+const { default: mongoose } = require("mongoose");
+const app = express();
+
+app.use(cors()); // Activation de la gestion des requêtes CORS
+app.use(express.json()); // initalisation du serveur express
+
+// Connexion à la base de données MongoDB
+mongoose.connect(
+  "mongodb+srv://wilonweb:VZ1TsAuGQ3td2Vsl@cluster0.nw96w6o.mongodb.net/?retryWrites=true&w=majority"
+);
+*/
+
+const User = require("./models/User");
+
+app.post("/register", async (req, res) => {
+  const { username, password } = req.body;
+  const UserDoc = await User.create({
+    username,
+    password,
+  });
+  res.json(UserDoc);
+});
+//app.listen(4000); // Démarrage du serveur sur le port 4000*/
+```
+
+Pour résumer :
+Afin d'envoyer les donnée de notre formulaire register à MongoDb il faut que mongoose soit installer dans notre api
+créer un model/schema qui définis la structure des donnée à envoyer à mongoDb
+Envoyer les données dans une requête post avec une fonction asynchrone
+
+### Gestion des erreurs avec try and catch.
+
+Maintenant afin d'afficher une erreur dans la console si l'enregistrement c'est mal passé on incorpore un `try ... catch` dans `api\index.js`
+
+```js
+app.post("/register", async (req, res) => {
+  const { username, password } = req.body;
+  try {
+    const UserDoc = await User.create({
+      username,
+      password,
+    });
+    res.json(UserDoc);
+  } catch (e) {
+    res.status(400).json(e);
+  }
+});
+```
+
+### Crypter le mot de passe.
+
+installation de `yarn add bcryptjs` afin de pouvoir hasher le password des utilisateur qui s'enregistre.
+
+Puis on initialise bcrypt et salt dans `api\index.js` afin d'utiliser une fonctionnalité de hashing sur la propriété password pour que le mot de passe soit envoyer de façon crypter a mongoDb.
+
+```js
+/*const express = require("express");
+const cors = require("cors");
+const { default: mongoose } = require("mongoose");*/
+const bcrypt = require("bcryptjs");
+
+const salt = bcrypt.genSaltSync(10);
+const secret = "joijoifjofdijfdoidj64654";
+/**
+const app = express();
+
+app.use(cors()); // Activation de la gestion des requêtes CORS
+
+app.use(express.json()); // initalisation du serveur express
+
+// Connexion à la base de données MongoDB
+mongoose.connect(
+  "mongodb+srv://wilonweb:VZ1TsAuGQ3td2Vsl@cluster0.nw96w6o.mongodb.net/?retryWrites=true&w=majority"
+);
+
+const User = require("./models/User");
+app.post("/register", async (req, res) => {
+  const { username, password } = req.body;
+  try {
+    const UserDoc = await User.create({
+      username,*/
+      password: bcrypt.hashSync(password, salt),
+  /**  });
+
+    res.json(UserDoc);
+  } catch (e) {
+    res.status(400).json(e);
+    console.log(e);
+  }
+});
+app.listen(4000); // Démarrage du serveur sur le port 4000*/
+```
+
+### Authentification : Comparaison des Identifiants du Formulaire de Connexion
+
+Maintenant qu'un utilisateur peut enregistrer ses informations d'identification dans mongoDb de façon sécurisé.
+Nous allons coder la page de Login afin qu'il puisse s'identifer.
+Nous devons comparer les informations envoyer dans le formulaire.
+Et si ça correspond rediriger l'utilisateur vers la page d'acceuil.
+
+#### Paramétrage du useState
+
+- Déclaration du useState pour les champ userName et password
+- Association avec l'attribut value
+- Mis a jour avec l'attribut onChange
+  `client\scale-management\src\Pages\LoginPage.js`
+
+```js
+import { Navigate } from "react-router-dom";
+import { useState } from "react";
+
+export default function LoginPage() {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  //const [redirect, setRedirect] = useState(false);
+/*
+  async function login(ev) {
+    ev.preventDefault();
+    const response = await fetch("http://localhost:4000/login", {
+      method: "POST",
+      body: JSON.stringify({ username, password }),
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+    });
+    if (response.ok) {
+      response.json().then((userInfo) => {
+        setRedirect(true);
+      });
+    } else {
+      alert("mauvaise redirection");
+    }*/*
+  }
+/*
+  if (redirect) {
+    return <Navigate to={"/"} />;
+  }*/
+  return (
+    <form action="" className="login" onSubmit={login}>
+      <h1>Login</h1>
+      <input
+        type="text"
+        placeholder="username"
+        value={username}
+        onChange={(ev) => setUsername(ev.target.value)}
+      />
+      <input
+        type="password"
+        placeholder="password"
+        value={password}
+        onChange={(ev) => setPassword(ev.target.value)}
+      />
+      <button>Login</button>
+    </form>
+  );
+ console.log(username);
+}
+```
+
+#### Déclaration de la fonction login
+
+Ensuite on créer la fonction Login pour envoyer une requête Post de userName et Password au format json
+
+- Déclaration d'une fonction asynchrone
+- Déclaration du ev.preventDefault
+- Requete POST coté client avec Fetch dans un objet JSON
+  `client\scale-management\src\Pages\LoginPage.js`
+
+```js
+async function login(ev) {
+  ev.preventDefault();
+  const response = await fetch("http://localhost:4000/login", {
+    method: "POST",
+    body: JSON.stringify({ username, password }),
+    headers: { "Content-Type": "application/json" }, //credentials: "include",
+  }); /**
+    if (response.ok) {
+      response.json().then((userInfo) => {
+        setRedirect(true);
+      });
+    } else {
+      alert("mauvaise redirection");
+    }*/
+}
+```
+
+#### Comparaison des credentials Login et Register
+
+Maintenant nous allons voir si les informations envoyer via le formulaire Login corresponde au information deja stocker dans la base de donnée.
+
+- Initialisation de la route pour gerer les requetes post envoyer vers l'url `/login`
+- extraction de username et password de l'objet `req.body`
+- verification d'un username similaire dans la base de donné avec la methode `findOne`
+- compare le mot de passe fourni dans la requête avec le mot de passe stocké dans le document utilisateur récupéré. Si les mots de passe correspondent, `passOk` sera `true`
+
+`api\index.js`
+
+```js
+app.post("/login", async (req, res) => {
+  const { username, password } = req.body;
+  const userDoc = await User.findOne({ username: username });
+  const passOk = bcrypt.compareSync(password, userDoc.password);
+  /*
+  if (passOk) {
+    jwt.sign({ username, id: userDoc.id }, secret, {}, (err, token) => {
+      if (err) throw err;
+      res.cookie("token", token).json("Yeahhh");
+    });
+  } else {
+    res.status(400).json("wrong credentials");
+  }*/
+});
+```
+
+#### Connection utilisateur avec JWT
+
+Maintenant nous allons utiliser `yarn add jsonwebtoken` pour faire en sorte que l'utilisateur soit connecté.
+
+- initialisation de JWT
+- Si c'est ok creation d'un cookie nommé token
+- Sinon créer une erreur 400
+
+```js
+/*app.post("/login", async (req, res) => {
+  const { username, password } = req.body;
+  const userDoc = await User.findOne({ username: username });
+  const passOk = bcrypt.compareSync(password, userDoc.password);*/*
+
+  if (passOk) {
+    jwt.sign({ username, id: userDoc.id }, secret, {}, (err, token) => {
+      if (err) throw err;
+      res.cookie("token", token).json("Yeahhh");
+    });
+  } else {
+    res.status(400).json("wrong credentials");
+  }
+});
+```
+
+#### Conservation du cookie des credentials sur d'autre url
+
+Pour que l'utilisateur puisse visiter d'autre page on dois garder les information sur toute les url pour cela on le mentionne dans `api\index.js`
+`app.use(cors({ credentials: true, origin: "http://localhost:3000" }));`
+
+Et `client\scale-management\src\Pages\LoginPage.js`
+
+```js
+/*async function login(ev) {
+    ev.preventDefault();
+    const response = await fetch("http://localhost:4000/login", {
+      method: "POST",
+      body: JSON.stringify({ username, password }),
+      headers: { "Content-Type": "application/json" },*/
+      credentials: "include",
+    });/**
+    if (response.ok) {
+      response.json().then((userInfo) => {
+        setRedirect(true);
+      });
+    } else {
+      alert("mauvaise redirection");
+    }*/
+  }
+```
+
+### Redirection si tout est ok
+
+Maintenant si tout est ok on redirige l'utilisateur vers la page d'accueil sinon on affiche un alerte
+
+- Initilalisation du hook Navigate de react-router-dom
+
+* initialisation d'un useState "redirect" avec une valeur par default sur false
+* création de la condition dans la fonction login
+* creation de la condition du rendu JSX
+
+```js
+import { Navigate } from "react-router-dom";
+//import { useState } from "react";
+
+/*export default function LoginPage() {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");*/
+  const [redirect, setRedirect] = useState(false);
+
+/**
+  async function login(ev) {
+    ev.preventDefault();
+    const response = await fetch("http://localhost:4000/login", {
+      method: "POST",
+      body: JSON.stringify({ username, password }),
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+    });*/
+    if (response.ok) {
+      response.json().then((userInfo) => {
+        setRedirect(true);
+      });
+    } else {
+      alert("mauvaise redirection");
+    }
+  }
+
+  if (redirect) {
+    return <Navigate to={"/"} />;
+  }
+/*
+  return (
+    <form action="" className="login" onSubmit={login}>
+      <h1>Login</h1>
+      <input
+        type="text"
+        placeholder="username"
+        value={username}
+        onChange={(ev) => setUsername(ev.target.value)}
+      />
+      <input
+        type="password"
+        placeholder="password"
+        value={password}
+        onChange={(ev) => setPassword(ev.target.value)}
+      />
+      <button>Login</button>
+    </form>
+  );
+}*/
+```
+
+Pour résumé afin de créer un systeme d'authentification on créer une requete POST pour envoyer les valeur du formulaire Login et si les valeurs corresponde avec celle stocker dans la base de donnée envoyer depuis le forumaire Regiser alors on créer un token a l'aide de JWT qui fournira une signature que l'utilisateur pourra garder a travers les different URL qu'il visite sur le site.
+
 ## Truc et astuces à revoir
 
 PS - Apprendre a utiliser le react dev tool
